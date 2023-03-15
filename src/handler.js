@@ -9,7 +9,6 @@ const addBookHandler = (request, h) => {
   const updatedAt = insertedAt
   const finished = pageCount === readPage
 
-  //   /* Client tidak melampirkan properti name pada request body */
   if (name === undefined) {
     const response = h.response({
       status: 'fail',
@@ -19,7 +18,6 @@ const addBookHandler = (request, h) => {
     return response
   }
 
-  /* Client melampirkan nilai properti readPage yang lebih besar dari nilai properti pageCount */
   if (readPage > pageCount) {
     const response = h.response({
       status: 'fail',
@@ -28,6 +26,7 @@ const addBookHandler = (request, h) => {
     response.code(400)
     return response
   }
+
   const newBook = {
     id, name, year, author, summary, publisher, pageCount, readPage, finished, reading, insertedAt, updatedAt
   }
@@ -57,6 +56,70 @@ const addBookHandler = (request, h) => {
 }
 
 const getAllBooksHandler = (request, h) => {
+  const { reading, finished, name } = request.query
+
+  let filteredBooks = []
+
+  if (name !== undefined) {
+    filteredBooks = books.filter((book) => book.name.toLowerCase().includes(name.toLowerCase())).map(book => ({
+      id: book.id,
+      name: book.name,
+      publisher: book.publisher
+    }))
+    const response = h.response({
+      status: 'success',
+      data: {
+        books: filteredBooks
+      }
+    })
+    return response
+  }
+
+  if (reading !== undefined) {
+    if (reading === '1') {
+      filteredBooks = books.filter((book) => book.reading === true).map(book => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher
+      }))
+    } else {
+      filteredBooks = books.filter((book) => book.reading === false).map(book => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher
+      }))
+    }
+    const response = h.response({
+      status: 'success',
+      data: {
+        books: filteredBooks
+      }
+    })
+    return response
+  }
+  if (finished !== undefined) {
+    if (finished === '1') {
+      filteredBooks = books.filter((book) => book.finished === true).map(book => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher
+      }))
+    } else {
+      filteredBooks = books.filter((book) => book.finished === false).map(book => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher
+      }))
+    }
+    const response = h.response({
+      status: 'success',
+      data: {
+        books: filteredBooks
+      }
+    })
+    return response
+  }
+
   if (books === undefined) {
     const response = h.response({
       status: 'success',
@@ -179,4 +242,11 @@ const deleteBookByIdHandler = (request, h) => {
   response.code(404)
   return response
 }
-module.exports = { addBookHandler, getAllBooksHandler, getBookByIdHandler, editBookByIdHandler, deleteBookByIdHandler }
+
+module.exports = {
+  addBookHandler,
+  getAllBooksHandler,
+  getBookByIdHandler,
+  editBookByIdHandler,
+  deleteBookByIdHandler
+}
