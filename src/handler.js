@@ -1,6 +1,8 @@
 const { nanoid } = require('nanoid')
 const books = require('./books')
 
+/** Add Book Handler */
+
 const addBookHandler = (request, h) => {
   const { name, year, author, summary, publisher, pageCount, readPage, reading } = request.payload
   const id = nanoid(16)
@@ -9,6 +11,7 @@ const addBookHandler = (request, h) => {
   const updatedAt = insertedAt
   const finished = pageCount === readPage
 
+  /** Add book with undefined name */
   if (name === undefined) {
     const response = h.response({
       status: 'fail',
@@ -18,6 +21,7 @@ const addBookHandler = (request, h) => {
     return response
   }
 
+  /** Add book if readPage > pageCount */
   if (readPage > pageCount) {
     const response = h.response({
       status: 'fail',
@@ -27,6 +31,7 @@ const addBookHandler = (request, h) => {
     return response
   }
 
+  /** Add book with complete data and finished reading */
   const newBook = {
     id, name, year, author, summary, publisher, pageCount, readPage, finished, reading, insertedAt, updatedAt
   }
@@ -55,11 +60,14 @@ const addBookHandler = (request, h) => {
   return response
 }
 
+/** Get all books handler */
+
 const getAllBooksHandler = (request, h) => {
   const { reading, finished, name } = request.query
 
   let filteredBooks = []
 
+  /** Get all books contains name based on the query */
   if (name !== undefined) {
     filteredBooks = books.filter((book) => book.name.toLowerCase().includes(name.toLowerCase())).map(book => ({
       id: book.id,
@@ -75,6 +83,7 @@ const getAllBooksHandler = (request, h) => {
     return response
   }
 
+  /** Get all reading and unreading books */
   if (reading !== undefined) {
     if (reading === '1') {
       filteredBooks = books.filter((book) => book.reading === true).map(book => ({
@@ -97,6 +106,8 @@ const getAllBooksHandler = (request, h) => {
     })
     return response
   }
+
+  /** Get all finished and unfinished books */
   if (finished !== undefined) {
     if (finished === '1') {
       filteredBooks = books.filter((book) => book.finished === true).map(book => ({
@@ -120,6 +131,7 @@ const getAllBooksHandler = (request, h) => {
     return response
   }
 
+  /** Get all books */
   if (books === undefined) {
     const response = h.response({
       status: 'success',
@@ -144,6 +156,7 @@ const getAllBooksHandler = (request, h) => {
   return response
 }
 
+/** Get book by id handler */
 const getBookByIdHandler = (request, h) => {
   const { bookId } = request.params
 
@@ -167,6 +180,7 @@ const getBookByIdHandler = (request, h) => {
   return response
 }
 
+/** Edit book by id handler */
 const editBookByIdHandler = (request, h) => {
   const { bookId } = request.params
   const { name, year, author, summary, publisher, pageCount, readPage, reading } = request.payload
@@ -175,6 +189,7 @@ const editBookByIdHandler = (request, h) => {
   const index = books.findIndex((book) => book.id === bookId)
   const finished = pageCount === readPage
 
+  /** Update book without name */
   if (name === undefined) {
     const response = h.response({
       status: 'fail',
@@ -184,6 +199,7 @@ const editBookByIdHandler = (request, h) => {
     return response
   }
 
+  /** Update book with readPage > pageCount */
   if (readPage > pageCount) {
     const response = h.response({
       status: 'fail',
@@ -193,6 +209,7 @@ const editBookByIdHandler = (request, h) => {
     return response
   }
 
+  /** Update book with invalid id and complete data */
   if (index !== -1) {
     books[index] = {
       ...books[index],
@@ -222,6 +239,7 @@ const editBookByIdHandler = (request, h) => {
   return response
 }
 
+/** Delete book by id handler */
 const deleteBookByIdHandler = (request, h) => {
   const { bookId } = request.params
   const index = books.findIndex((book) => book.id === bookId)
